@@ -1,46 +1,20 @@
-import { useEffect, useRef, useState } from 'react';
-import { nanoid } from 'nanoid';
 import ContactForm from './ContactForm';
 import ContactList from './ContactList';
 import Filter from 'components/Filter';
+import { useDispatch, useSelector } from 'react-redux';
+import { addContact, deleteContact } from 'redux/contactsSlice';
+import { getContacts, getFilter } from 'redux/selectors';
+import { changeFilter } from 'redux/filterSlice';
 
 export const App = () => {
-  const [contacts, setContacts] = useState([]);
-  const [filter, setFilter] = useState('');
-  const isFirstRender = useRef(true);
+  const dispatch = useDispatch();
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(getFilter);
 
-  useEffect(() => {
-    const contactList = JSON.parse(localStorage.getItem('contacts'));
-    if (contactList) setContacts(contactList);
-  }, []);
+  const createContact = contact => dispatch(addContact(contact));
+  const removeContact = id => dispatch(deleteContact(id));
 
-  useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-
-    const contactList = JSON.stringify(contacts);
-    if (contactList) localStorage.setItem('contacts', contactList);
-  }, [contacts]);
-
-  const addContact = contact => {
-    setContacts(prev => [...prev, { ...contact, id: nanoid() }]);
-  };
-
-  const removeContact = id => {
-    setContacts(prev => prev.filter(contact => contact.id !== id));
-  };
-
-  const handleChange = ({ target: { name, value } }) => {
-    switch (name) {
-      case 'filter':
-        setFilter(value);
-        break;
-      default:
-        console.log(`Name - ${name} is not defined`);
-    }
-  };
+  const handleChange = ({ target: { value } }) => dispatch(changeFilter(value));
 
   const getFilterNormalize = () => filter.toLowerCase();
 
@@ -56,7 +30,7 @@ export const App = () => {
       }}
     >
       <h1>Phonebook</h1>
-      <ContactForm contacts={contacts} onSubmit={addContact} />
+      <ContactForm contacts={contacts} onSubmit={createContact} />
       <h2
         style={{
           fontSize: 28,
