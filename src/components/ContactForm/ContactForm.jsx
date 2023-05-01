@@ -1,4 +1,3 @@
-import PropTypes from 'prop-types';
 import { useState } from 'react';
 import {
   ContactFormWrapper,
@@ -6,10 +5,17 @@ import {
   FormInput,
   FormButton,
 } from './ContactForm.styled';
+import { useDispatch, useSelector } from 'react-redux';
+import { getContacts } from 'redux/selectors';
+import { addContact } from 'redux/contactsSlice';
 
-const ContactForm = ({ contacts, onSubmit }) => {
+const ContactForm = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+  const dispatch = useDispatch();
+  const contacts = useSelector(getContacts);
+
+  const createContact = contact => dispatch(addContact(contact));
 
   const handleChange = ({ target: { name, value } }) => {
     switch (name) {
@@ -28,7 +34,7 @@ const ContactForm = ({ contacts, onSubmit }) => {
     e.preventDefault();
 
     if (contacts.some(contact => contact.name === name)) alertmessage(name);
-    else onSubmit({ name, number });
+    else createContact({ name, number });
 
     setName('');
     setNumber('');
@@ -63,11 +69,6 @@ const ContactForm = ({ contacts, onSubmit }) => {
       <FormButton type="submit">Add to contact</FormButton>
     </ContactFormWrapper>
   );
-};
-
-ContactForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-  contacts: PropTypes.array.isRequired,
 };
 
 export default ContactForm;
